@@ -92,6 +92,10 @@ ALTER TABLE DEPT_COPY
 MODIFY LOCATION_ID CONSTRAINT SYS_C007454 NULL;
 
 
+/* 제약 조건은 수정이 안되기 때문에 
+ * 삭제 후 다시 생성하는 형식으로 수정을 진행!
+ * */
+
 
 ---------------------------------------------------------------------------------
 -- 2. 컬럼 추가/수정/삭제
@@ -117,31 +121,76 @@ MODIFY LOCATION_ID CONSTRAINT SYS_C007454 NULL;
 -- DEPT_COPY 컬럼에 CNAME VARCHAR2(20) 컬럼 추가
 -- ALTER TABLE 테이블명 ADD(컬럼명 데이터타입 [DEFAULT '값']);
 
+ALTER TABLE DEPT_COPY 
+ADD (CNAME VARCHAR2(20));
+
+SELECT * FROM DEPT_COPY;
 
 -- (추가)
 -- DEPT_COPY 테이블에 LNAME VARCHAR2(30) 기본값 '한국' 컬럼 추가
+ALTER TABLE DEPT_COPY
+ADD (LNAME VARCHAR2(30) DEFAULT '한국');
+--> 컬럼이 만들어 지면서 DEFAULT 값으로 채워짐
 
+SELECT * FROM DEPT_COPY;
 
 -- (수정)
 -- DEPT_COPY 테이블의 DEPT_ID 컬럼의 데이터 타입을 CHAR(2) -> VARCHAR2(3)으로 변경
--- ALTER TABLE 테이블명 MOIDFY 컬럼명 데이터타입;
+-- ALTER TABLE 테이블명 MODIFY 컬럼명 데이터타입;
+ALTER TABLE DEPT_COPY
+MODIFY DEPT_ID VARCHAR2(3);
 
 
 -- (수정 에러 상황)
 -- DEPT_TITLE 컬럼의 데이터타입을 VARCHAR2(10)으로 변경
+ALTER TABLE DEPT_COPY
+MODIFY DEPT_TITLE VARCHAR2(10);
+-- ORA-01441: 일부 값이 너무 커서 열 길이를 줄일 수 없음
+--> 이미 저장된 데이터 보다 컬럼의 크기를 작게 변경할 수 없다!!!
+
+SELECT DEPT_TITLE FROM DEPT_COPY;
+
 
 
 -- (기본값 수정)
 -- LNAME 기본값을 '한국' -> '대한민국' 으로 변경
--- ALTER TABLE 테이블명 MOIDFY 컬럼명 DEFAULT '값'; 
+-- ALTER TABLE 테이블명 MODIFY 컬럼명 DEFAULT '값'; 
+ALTER TABLE DEPT_COPY
+MODIFY LNAME DEFAULT '대한민국';
+
+SELECT * FROM DEPT_COPY;
+
+-- LNAME 컬럼 값을 모두 '대한민국'으로 변경
+UPDATE DEPT_COPY
+SET LNAME = DEFAULT;
+
+COMMIT;
+
+
 
 
 -- (삭제)
 -- DEPT_COPY에 추가한 컬럼(CNAME, LNAME) 삭제
 -->  ALTER TABLE 테이블명 DROP(삭제할컬럼명);
+ALTER TABLE DEPT_COPY DROP(CNAME);
 
+SELECT * FROM DEPT_COPY;
 
 -->  ALTER TABLE 테이블명 DROP COLUMN 삭제할컬럼명;
+ALTER TABLE DEPT_COPY DROP COLUMN LNAME;
+SELECT * FROM DEPT_COPY;
+
+
+-- DEPT_TITLE, LOCATION_ID 컬럼도 삭제
+ALTER TABLE DEPT_COPY DROP COLUMN DEPT_TITLE;
+ALTER TABLE DEPT_COPY DROP COLUMN LOCATION_ID;
+
+SELECT * FROM DEPT_COPY;
+
+
+-- 마지막 남은 DEPT_ID 컬럼도 삭제 시도
+ALTER TABLE DEPT_COPY DROP COLUMN DEPT_ID;
+-- ORA-12983: 테이블에 모든 열들을 삭제할 수 없습니다
 
 
 
@@ -185,7 +234,9 @@ CREATE TABLE TB2(
 );
 
 -- 일반 삭제(DEPT_COPY)
-DROP TABLE DEPT_COPY; -- Table DEPT_COPY이(가) 삭제되었습니다.
+DROP TABLE DEPT_COPY;-- Table DEPT_COPY이(가) 삭제되었습니다.
+
+SELECT * FROM DEPT_COPY;
 
 
 -- ** 관계가 형성된 테이블 중 부모테이블(TB1) 삭제 **
